@@ -80,7 +80,7 @@ export default {
 			)
 		},
 		envelopes() {
-			if (_.isUndefined(this.searchQuery)) {
+			if (this.searchQuery === undefined) {
 				return this.$store.getters.getEnvelopes(this.account.id, this.folder.id)
 			} else {
 				return this.$store.getters.getSearchEnvelopes(this.account.id, this.folder.id)
