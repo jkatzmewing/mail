@@ -85,9 +85,10 @@ import {saveDraft, sendMessage} from '../service/MessageService'
 export default {
 	name: 'Message',
 	components: {
-		Actions,
 		ActionButton,
+		Actions,
 		AddressList,
+		AppContentDetails,
 		Error,
 		Loading,
 		MessageAttachments,
@@ -301,7 +302,7 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 #mail-message {
 	flex-grow: 1;
 }
@@ -314,15 +315,37 @@ export default {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
+	align-items: center;
+	padding: 30px 0;
+	// somehow ios doesn't care about this !important rule
+	// so we have to manually set left/right padding to chidren
+	// for 100% to be used
+	box-sizing: content-box !important;
+	height: 44px;
+	width: 100%;
 }
 
-#mail-message-header-fields h2,
-#mail-message-header-fields p {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	padding-bottom: 7px;
-	margin-bottom: 0;
+#mail-message-header-fields {
+	// initial width
+	width: 0;
+	padding-left: 44px;
+	// grow and try to fill 100%
+	flex: 1 1 auto;
+	h2,
+	p {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		padding-bottom: 7px;
+		margin-bottom: 0;
+	}
+
+	.transparency {
+		opacity: 0.6;
+		a {
+			font-weight: bold;
+		}
+	}
 }
 
 #mail-content,
@@ -350,20 +373,12 @@ export default {
 	word-wrap: break-word;
 }
 
-#mail-message-header-fields .transparency {
-	opacity: 0.6;
-}
-
-#mail-message-header-fields .transparency a {
-	font-weight: bold;
-}
-
 #mail-message-actions { 
 	display: flex;
 	flex-direction: row;
 	justify-content: flex-end;
 	margin-left: 10px;
-	margin-right: 5px;
+	margin-right: 35px;
 	height: 44px;
 }
 
