@@ -266,8 +266,6 @@ export default {
 			let envelopes = this.$store.getters.getEnvelopes(this.$route.params.accountId, this.$route.params.folderId)
 			const idx = envelopes.indexOf(this.envelope)
 
-			Logger.debug('envelopes',envelopes)
-			Logger.debug('envelope',this.envelope)
 			let next
 			if (idx === -1) {
 			        Logger.debug('envelope to delete does not exist in envelope list')
@@ -278,13 +276,13 @@ export default {
 			        next = envelopes[idx - 1]
 			}
 
+			this.$emit('delete', this.envelope)
+			this.$store.dispatch('deleteMessage', this.envelope)
+
 			if (!next) {
 		        	Logger.debug('no next/previous envelope, not navigating')
 			        return
 			}
-
-			this.$emit('delete', this.envelope)
-			this.$store.dispatch('deleteMessage', this.envelope)
 
 			// Keep the selected account-folder combination, but navigate to a different message
 			// (it's not a bug that we don't use next.accountId and next.folderId here)
