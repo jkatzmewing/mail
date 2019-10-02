@@ -29,6 +29,7 @@ use OCA\Mail\Account;
 use OCA\Mail\Db\Mailbox;
 use OCA\Mail\Db\MailboxMapper;
 use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\AppFramework\Utility\ITimeFactory;
 use OCP\DB\QueryBuilder\IQueryBuilder;
 use OCP\IDBConnection;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -43,12 +44,17 @@ class MailboxMapperTest extends TestCase {
 	/** @var MailboxMapper */
 	private $mapper;
 
+	/** @var ITimeFactory| MockObject */
+	private $timeFactory;
+
 	protected function setUp() {
 		parent::setUp();
 
 		$this->db = \OC::$server->getDatabaseConnection();
+		$this->timeFactory = $this->createMock(ITimeFactory::class);
 		$this->mapper = new MailboxMapper(
-			$this->db
+			$this->db,
+			$this->timeFactory
 		);
 
 		$qb = $this->db->getQueryBuilder();
@@ -75,7 +81,9 @@ class MailboxMapperTest extends TestCase {
 				->values([
 					'name' => $qb->createNamedParameter("folder$i"),
 					'account_id' => $qb->createNamedParameter($i <= 5 ? 13 : 14, IQueryBuilder::PARAM_INT),
-					'sync_token' => $qb->createNamedParameter('VTEsVjE0Mjg1OTkxNDk='),
+					'sync_new_token' => $qb->createNamedParameter('VTEsVjE0Mjg1OTkxNDk='),
+					'sync_changed_token' => $qb->createNamedParameter('VTEsVjE0Mjg1OTkxNDk='),
+					'sync_vanished_token' => $qb->createNamedParameter('VTEsVjE0Mjg1OTkxNDk='),
 					'delimiter' => $qb->createNamedParameter('.'),
 					'messages' => $qb->createNamedParameter($i * 100, IQueryBuilder::PARAM_INT),
 					'unseen' => $qb->createNamedParameter($i, IQueryBuilder::PARAM_INT),
@@ -107,7 +115,9 @@ class MailboxMapperTest extends TestCase {
 			->values([
 				'name' => $qb->createNamedParameter('INBOX'),
 				'account_id' => $qb->createNamedParameter(13, IQueryBuilder::PARAM_INT),
-				'sync_token' => $qb->createNamedParameter('VTEsVjE0Mjg1OTkxNDk='),
+				'sync_new_token' => $qb->createNamedParameter('VTEsVjE0Mjg1OTkxNDk='),
+				'sync_changed_token' => $qb->createNamedParameter('VTEsVjE0Mjg1OTkxNDk='),
+				'sync_vanished_token' => $qb->createNamedParameter('VTEsVjE0Mjg1OTkxNDk='),
 				'delimiter' => $qb->createNamedParameter('.'),
 				'messages' => $qb->createNamedParameter(0, IQueryBuilder::PARAM_INT),
 				'unseen' => $qb->createNamedParameter(0, IQueryBuilder::PARAM_INT),
@@ -138,7 +148,9 @@ class MailboxMapperTest extends TestCase {
 			->values([
 				'name' => $qb->createNamedParameter('Trash'),
 				'account_id' => $qb->createNamedParameter(13, IQueryBuilder::PARAM_INT),
-				'sync_token' => $qb->createNamedParameter('VTEsVjE0Mjg1OTkxNDk='),
+				'sync_new_token' => $qb->createNamedParameter('VTEsVjE0Mjg1OTkxNDk='),
+				'sync_changed_token' => $qb->createNamedParameter('VTEsVjE0Mjg1OTkxNDk='),
+				'sync_vanished_token' => $qb->createNamedParameter('VTEsVjE0Mjg1OTkxNDk='),
 				'delimiter' => $qb->createNamedParameter('.'),
 				'messages' => $qb->createNamedParameter(0, IQueryBuilder::PARAM_INT),
 				'unseen' => $qb->createNamedParameter(0, IQueryBuilder::PARAM_INT),

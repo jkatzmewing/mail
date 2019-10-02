@@ -24,37 +24,42 @@
 namespace OCA\Mail\Tests\IMAP\Search;
 
 use ChristophWurst\Nextcloud\Testing\TestCase;
-use OCA\Mail\IMAP\Search\SearchFilterStringParser;
+use OCA\Mail\Service\Search\FilterStringParser;
+use OCA\Mail\Service\Search\SearchQuery;
 
-class SearchFilterStringParserTest extends TestCase {
+class FilterStringParserTest extends TestCase {
 
 	private function search($filter) {
-		$helper = new SearchFilterStringParser();
-		$query = $helper->parse($filter);
-		return (string)($query->build()['query']);
+		$helper = new FilterStringParser();
+		return $helper->parse($filter);
 	}
 
 	public function testSearchEmpty() {
-		$this->assertEquals('ALL', $this->search(''));
+		$this->assertEmpty($this->search('')->getTextTokens());
 	}
 
 	public function testSearchTest() {
-		$this->assertEquals('TEXT "dummy text"', $this->search('dummy text'));
+		$this->assertEquals(['dummy', 'text'], $this->search('dummy text')->getTextTokens());
 	}
 
 	public function testSearchUnread() {
-		$this->assertEquals('UNSEEN', $this->search('is:unread'));
+		$this->assertEquals(['SEEN' => false], $this->search('is:unread')->getFlags());
 	}
 
 	public function testSearchNotAnswered() {
-		$this->assertEquals('UNANSWERED', $this->search('not:answered'));
+		$this->assertEquals(['ANSWERED' => false], $this->search('not:answered')->getFlags());
 	}
 
 	public function testSearchFrom() {
-		$this->assertEquals('FROM somebody@example.com', $this->search('from:somebody@example.com'));
+		$this->assertEquals(['somebody@example.com'], $this->search('from:somebody@example.com')->getFrom());
 	}
 
 	public function testSearchMixed() {
-		$this->assertEquals('UNSEEN FROM somebody@example.com TEXT nextcloud', $this->search('from:somebody@example.com is:unread nextcloud'));
+		$expected = new SearchQuery();
+		$expected->addFlag('SEEN', false);
+		$expected->addTextToken('nextcloud');
+		$expected->addFrom('somebody@example.com');
+
+		$this->assertEquals($expected, $this->search('from:somebody@example.com is:unread nextcloud'));
 	}
 }

@@ -56,6 +56,23 @@ class MailAccountMapper extends QBMapper {
 	}
 
 	/**
+	 * Finds an mail account by id
+	 *
+	 * @param int $id
+	 *
+	 * @return MailAccount
+	 */
+	public function findById(int $id): MailAccount {
+		$qb = $this->db->getQueryBuilder();
+		$query = $qb
+			->select('*')
+			->from($this->getTableName())
+			->where($qb->expr()->eq('id', $qb->createNamedParameter($id)));
+
+		return $this->findEntity($query);
+	}
+
+	/**
 	 * Finds all Mail Accounts by user id existing for this user
 	 *
 	 * @param string $userId the id of the user that we want to find
@@ -86,6 +103,15 @@ class MailAccountMapper extends QBMapper {
 			$this->update($account);
 			return $account;
 		}
+	}
+
+	public function getAllAccounts(): array  {
+		$qb = $this->db->getQueryBuilder();
+		$query = $qb
+			->select('*')
+			->from($this->getTableName());
+
+		return $this->findEntities($query);
 	}
 
 }

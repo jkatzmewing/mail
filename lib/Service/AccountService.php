@@ -26,11 +26,13 @@ namespace OCA\Mail\Service;
 
 use Exception;
 use OCA\Mail\Account;
+use OCA\Mail\BackgroundJob\SyncJob;
 use OCA\Mail\Db\MailAccount;
 use OCA\Mail\Db\MailAccountMapper;
 use OCA\Mail\Exception\ServiceException;
 use OCA\Mail\Service\DefaultAccount\Manager;
 use OCP\AppFramework\Db\DoesNotExistException;
+use OCP\BackgroundJob\IJobList;
 
 class AccountService {
 
@@ -50,12 +52,17 @@ class AccountService {
 	/** @var AliasesService */
 	private $aliasesService;
 
+	/** @var IJobList */
+	private $jobList;
+
 	public function __construct(MailAccountMapper $mapper,
 								Manager $defaultAccountManager,
-								AliasesService $aliasesService) {
+								AliasesService $aliasesService,
+								IJobList $jobList) {
 		$this->mapper = $mapper;
 		$this->defaultAccountManager = $defaultAccountManager;
 		$this->aliasesService = $aliasesService;
+		$this->jobList = $jobList;
 	}
 
 	/**
@@ -77,6 +84,14 @@ class AccountService {
 		}
 
 		return $this->accounts;
+	}
+
+	/**
+	 * @param string $id
+	 * @return Account
+	 */
+	public function findById(int $id): Account {
+		return new Account($this->mapper->findById($id));
 	}
 
 	/**
@@ -124,7 +139,12 @@ class AccountService {
 	 * @return MailAccount
 	 */
 	public function save(MailAccount $newAccount): MailAccount {
-		return $this->mapper->save($newAccount);
+		$newAccount = $this->mapper->save($newAccount);
+
+		// Insert a background sync job for this account
+		$this->jobList->add(SyncJob::class, ['accountId' => $newAccount->getId()]);
+
+		return $newAccount;
 	}
 
 	public function updateSignature(int $id, string $uid, string $signature = null): void {

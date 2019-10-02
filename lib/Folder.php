@@ -50,9 +50,6 @@ class Folder implements JsonSerializable {
 	/** @var string */
 	private $displayName;
 
-	/** @var string */
-	private $syncToken;
-
 	/**
 	 * @param Account $account
 	 * @param Horde_Imap_Client_Mailbox $mailbox
@@ -148,17 +145,6 @@ class Folder implements JsonSerializable {
 	}
 
 	/**
-	 * @param string $syncToken
-	 */
-	public function setSyncToken($syncToken) {
-		$this->syncToken = $syncToken;
-	}
-
-	public function getSyncToken(): ?string {
-		return $this->syncToken;
-	}
-
-	/**
 	 * @return array
 	 */
 	public function jsonSerialize() {
@@ -179,7 +165,6 @@ class Folder implements JsonSerializable {
 			'folders' => array_values($folders),
 			'specialUse' => $this->specialUse,
 			'specialRole' => empty($this->specialUse) ? null : $this->specialUse[0],
-			'syncToken' => $this->syncToken,
 		];
 	}
 
