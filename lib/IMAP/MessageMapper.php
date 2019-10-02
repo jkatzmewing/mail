@@ -36,6 +36,7 @@ use OCA\Mail\Exception\ServiceException;
 use OCA\Mail\Model\IMAPMessage;
 use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\ILogger;
+use function iterator_to_array;
 
 class MessageMapper {
 
@@ -65,6 +66,33 @@ class MessageMapper {
 	}
 
 	/**
+	 * @param Horde_Imap_Client_Socket $client
+	 * @param Mailbox $mailbox
+	 *
+	 * @return IMAPMessage[]
+	 * @throws Horde_Imap_Client_Exception
+	 */
+	public function findAll(Horde_Imap_Client_Socket $client, Mailbox $mailbox): array {
+		$query = new Horde_Imap_Client_Fetch_Query();
+		$query->uid();
+
+		return $this->findByIds(
+			$client,
+			$mailbox->getMailbox(),
+			array_map(
+				function(Horde_Imap_Client_Data_Fetch $data) {
+					return $data->getUid();
+				},
+				iterator_to_array($client->fetch(
+					$mailbox->getMailbox(),
+					$query,
+					[]
+				))
+			)
+		);
+	}
+
+	/**
 	 * @return IMAPMessage[]
 	 * @throws Horde_Imap_Client_Exception
 	 */
@@ -75,10 +103,8 @@ class MessageMapper {
 		$query = new Horde_Imap_Client_Fetch_Query();
 		$query->envelope();
 		$query->flags();
-		$query->size();
 		$query->uid();
 		$query->imapDate();
-		$query->structure();
 
 		$fetchResults = iterator_to_array($client->fetch($mailbox, $query, [
 			'ids' => new Horde_Imap_Client_Ids($ids),

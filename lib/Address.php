@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 declare(strict_types=1);
 
 /**
@@ -29,6 +29,11 @@ use Horde_Mail_Rfc822_Address;
 use JsonSerializable;
 
 class Address implements JsonSerializable {
+
+	public const TYPE_FROM = 0;
+	public const TYPE_TO = 1;
+	public const TYPE_CC = 2;
+	public const TYPE_BCC = 3;
 
 	/** @var Horde_Mail_Rfc822_Address */
 	private $wrapped;

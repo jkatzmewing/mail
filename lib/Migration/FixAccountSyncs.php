@@ -1,11 +1,9 @@
 <?php
-
 declare(strict_types=1);
-
 /**
- * @copyright 2019 Christoph Wurst <christoph@winzerhof-wurst.at>
+ * @copyright Copyright (c) 2019, Roeland Jago Douma <roeland@famdouma.nl>
  *
- * @author 2019 Christoph Wurst <christoph@winzerhof-wurst.at>
+ * @author Roeland Jago Douma <roeland@famdouma.nl>
  *
  * @license GNU AGPL version 3 or any later version
  *
@@ -21,36 +19,46 @@ declare(strict_types=1);
  *
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  */
 
 namespace OCA\Mail\Migration;
 
-use OCA\Mail\Service\Provisioning\Manager as ProvisioningManager;
+use OCA\Mail\BackgroundJob\SyncJob;
+use OCA\Mail\Db\MailAccount;
+use OCA\Mail\Db\MailAccountMapper;
+use OCP\BackgroundJob\IJobList;
 use OCP\Migration\IOutput;
 use OCP\Migration\IRepairStep;
 
-class ProvisionAccounts implements IRepairStep {
+class FixAccountSyncs implements IRepairStep {
 
-	/** @var ProvisioningManager */
-	private $provisioningManager;
+	/** @var IJobList */
+	private $jobList;
+	/** @var MailAccountMapper */
+	private $mapper;
 
-	public function __construct(ProvisioningManager $provisioningManager) {
-		$this->provisioningManager = $provisioningManager;
+	public function __construct(IJobList $jobList, MailAccountMapper $mapper) {
+		$this->jobList = $jobList;
+		$this->mapper = $mapper;
 	}
 
 	public function getName(): string {
-		return 'Create or update provisioned Mail accounts';
+		return 'Insert sync background job for all accounts';
 	}
 
 	public function run(IOutput $output) {
-		$config = $this->provisioningManager->getConfig();
-		if ($config === null) {
-			$output->info("No Mail provisioning config set");
-			return;
+		/** @var MailAccount[] $accounts */
+		$accounts = $this->mapper->getAllAccounts();
+
+		$output->startProgress(count($accounts));
+
+		foreach ($accounts as $account) {
+			$this->jobList->add(SyncJob::class, ['accountId' => $account->getId()]);
+			$output->advance();
 		}
 
-		$cnt = $this->provisioningManager->provision($config);
-		$output->info("$cnt accounts provisioned");
+		$output->finishProgress();
 	}
 
 }
