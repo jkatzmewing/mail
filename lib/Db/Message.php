@@ -26,13 +26,12 @@ namespace OCA\Mail\Db;
 use JsonSerializable;
 use OCA\Mail\AddressList;
 use OCP\AppFramework\Db\Entity;
-use function json_encode;
 
 /**
  * @method void setUid(int $uid)
  * @method int getUid()
- * @method void setMessageId(string $id)
  * @method string getMessageId()
+ * @method string getParentMessageId()
  * @method void setMailboxId(int $mailbox)
  * @method int getMailboxId()
  * @method void setSubject(string $subject)
@@ -62,6 +61,7 @@ class Message extends Entity implements JsonSerializable {
 
 	protected $uid;
 	protected $messageId;
+	protected $parentMessageId;
 	protected $mailboxId;
 	protected $subject;
 	protected $sentAt;
@@ -103,6 +103,20 @@ class Message extends Entity implements JsonSerializable {
 		$this->addType('flagJunk', 'bool');
 		$this->addType('flagNotjunk', 'bool');
 		$this->addType('updatedAt', 'integer');
+	}
+
+	public function setMessageId(?string $id): void {
+		if (empty($id)) {
+			parent::setter('messageId', [null]);
+		}
+		parent::setter('messageId', [$id]);
+	}
+
+	public function setParentMessageId(?string $id): void {
+		if (empty($id)) {
+			parent::setter('parentMessageId', [null]);
+		}
+		parent::setter('parentMessageId', [$id]);
 	}
 
 	/**
