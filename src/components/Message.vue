@@ -274,6 +274,7 @@ export default {
 }
 
 .mail-message-body {
+	flex-grow: 1;
 	margin-bottom: 100px;
 }
 
