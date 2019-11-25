@@ -1,5 +1,5 @@
 <template>
-	<router-link class="app-content-list-item" :class="{unseen: data.flags.unseen, draft}" :to="link">
+	<router-link class="app-content-list-item" :class="{unseen: data.flags.unseen, draft, selected: selected}" :to="link" @click.native="onClick">
 		<div
 			v-if="folder.isUnified"
 			class="mail-message-account-color"
@@ -61,6 +61,10 @@ export default {
 			type: Object,
 			required: true,
 		},
+		selected: {
+			type: Boolean,
+			default: false
+		}
 	},
 	computed: {
 		accountColor() {
@@ -138,6 +142,18 @@ export default {
 			this.$emit('delete', this.data)
 			this.$store.dispatch('deleteMessage', this.data)
 		},
+		onClick(e) {
+			// If shift or control key is pressed we must handle multiple selection 
+			// rather than following the link
+			if (e.shiftKey || e.ctrlKey) {
+				if (e.ctrlKey) {
+					this.selected = !this.selected
+				} else {
+					// TODO
+				}
+				e.preventDefault()
+			}
+		}
 	},
 }
 </script>
@@ -156,6 +172,9 @@ export default {
 }
 .app-content-list-item.draft .app-content-list-item-line-two {
 	font-style: italic;
+}
+.app-content-list-item.selected {
+	background-color: var(--color-background-dark);
 }
 
 .icon-reply,
