@@ -1,5 +1,10 @@
 <template>
-	<router-link class="app-content-list-item" :class="{unseen: data.flags.unseen, draft, selected: selected}" :to="link" @click.native="onClick">
+	<router-link
+		class="app-content-list-item"
+		:class="{unseen: data.flags.unseen, draft, selected: data.flags.selected}"
+		:to="link"
+		@click.native="onClick"
+	>
 		<div
 			v-if="folder.isUnified"
 			class="mail-message-account-color"
@@ -61,10 +66,6 @@ export default {
 			type: Object,
 			required: true,
 		},
-		selected: {
-			type: Boolean,
-			default: false
-		}
 	},
 	computed: {
 		accountColor() {
@@ -143,17 +144,17 @@ export default {
 			this.$store.dispatch('deleteMessage', this.data)
 		},
 		onClick(e) {
-			// If shift or control key is pressed we must handle multiple selection 
+			// If shift or control key is pressed we must handle multiple selection
 			// rather than following the link
 			if (e.shiftKey || e.ctrlKey) {
 				if (e.ctrlKey) {
-					this.selected = !this.selected
+					this.$store.dispatch('toggleEnvelopeSelected', this.data)
 				} else {
 					// TODO
 				}
 				e.preventDefault()
 			}
-		}
+		},
 	},
 }
 </script>

@@ -464,6 +464,15 @@ export default {
 			})
 		})
 	},
+	toggleEnvelopeSelected({commit, getters}, envelope) {
+		const oldState = envelope.flags.selected || false
+		console.log('oldState', oldState)
+		commit('flagEnvelope', {
+			envelope,
+			flag: 'selected',
+			value: !oldState,
+		})
+	},
 	fetchMessage({commit}, uid) {
 		const {accountId, folderId, id} = parseUid(uid)
 		return fetchMessage(accountId, folderId, id).then(message => {
