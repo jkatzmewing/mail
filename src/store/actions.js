@@ -57,7 +57,7 @@ export default {
 	fetchAccounts({commit, getters}) {
 		return fetchAllAccounts().then(accounts => {
 			accounts.forEach(account => commit('addAccount', account))
-			return getters.getAccounts()
+			return getters.accounts
 		})
 	},
 	fetchAccount({commit}, id) {
@@ -112,6 +112,28 @@ export default {
 			commit('addFolder', {account, folder})
 		})
 	},
+	moveAccount({commit, getters}, {account, up}) {
+		const accounts = getters.accounts
+		const index = accounts.indexOf(account)
+		if (up) {
+			const previous = accounts[index - 1]
+			accounts[index - 1] = account
+			accounts[index] = previous
+		} else {
+			const next = accounts[index + 1]
+			accounts[index + 1] = account
+			accounts[index] = next
+		}
+		return Promise.all(
+			accounts.map((account, idx) => {
+				if (account.id === 0) {
+					return
+				}
+				commit('saveAccountsOrder', {account, order: idx})
+				return patchAccount(account, {order: idx})
+			})
+		)
+	},
 	markFolderRead({dispatch}, {account, folderId}) {
 		return markFolderRead(account.id, folderId).then(
 			dispatch('syncEnvelopes', {
@@ -132,8 +154,7 @@ export default {
 			//
 			// TODO: handle short/ending streams and show their last element as well
 			return Promise.all(
-				getters
-					.getAccounts()
+				getters.accounts
 					.filter(account => !account.isUnified)
 					.map(account =>
 						Promise.all(
@@ -199,8 +220,7 @@ export default {
 
 		// We only care about folders of the same type/role
 		const individualFolders = flatten(
-			getters
-				.getAccounts()
+			getters.accounts
 				.filter(a => !a.isUnified)
 				.map(a => getters.getFolders(a.id).filter(f => f.specialRole === folder.specialRole))
 		)
@@ -319,8 +339,7 @@ export default {
 
 		if (folder.isUnified) {
 			return Promise.all(
-				getters
-					.getAccounts()
+				getters.accounts
 					.filter(account => !account.isUnified)
 					.map(account =>
 						Promise.all(
@@ -382,8 +401,7 @@ export default {
 	},
 	syncInboxes({getters, dispatch}) {
 		return Promise.all(
-			getters
-				.getAccounts()
+			getters.accounts
 				.filter(a => !a.isUnified)
 				.map(account => {
 					return Promise.all(
