@@ -16,14 +16,7 @@ jobs:
       with:
         php-version: ${{ matrix.php-versions }}
         extension-csv: ctype,curl,dom,gd,iconv,intl,json,mbstring,openssl,posix,sqlite,xml,zip
-        coverage: none
-#    - name: Checkout Nextcloud
-#      uses: actions/checkout@v1
-#      with:
-#        repository: nextcloud/server
-#        submodules: true
-#        ref: ${{ matrix.nextcloud-versions }}
-#        path: ./nextcloud
+        coverage: xdebug
     - name: Checkout Nextcloud
       run: git clone https://github.com/nextcloud/server.git --recursive --depth 1 -b ${{ matrix.nextcloud-versions }} nextcloud
     - name: Run tests
@@ -37,4 +30,9 @@ jobs:
       run: composer install
     - name: Run tests
       working-directory: nextcloud/apps/mail
-      run: composer run test:unit:dev
+      run: composer run test:unit
+    - name: Upload coverage to Scrutinizer
+      working-directory: nextcloud/apps/mail
+      run: |
+		  wget https://scrutinizer-ci.com/ocular.phar
+	      php ocular.phar code-coverage:upload --format=php-clover tests/clover.unit.xml

@@ -120,7 +120,6 @@ script:
   # Run PHP tests
   - sh -c "if [ '$TEST_SUITE' = 'TEST-PHP' ]; then composer test:integration; fi"
   - if [[ "$PHP_COVERAGE" = "TRUE" ]]; then wget https://scrutinizer-ci.com/ocular.phar; fi
-  - if [[ "$PHP_COVERAGE" = "TRUE" ]]; then php ocular.phar code-coverage:upload --format=php-clover tests/clover.unit.xml; fi
   - if [[ "$PHP_COVERAGE" = "TRUE" ]]; then php ocular.phar code-coverage:upload --format=php-clover tests/clover.integration.xml; fi
 
   # Test packaging
