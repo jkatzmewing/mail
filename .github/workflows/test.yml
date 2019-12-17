@@ -34,5 +34,5 @@ jobs:
     - name: Upload coverage to Scrutinizer
       working-directory: nextcloud/apps/mail
       run: |
-		  wget https://scrutinizer-ci.com/ocular.phar
-	      php ocular.phar code-coverage:upload --format=php-clover tests/clover.unit.xml
+          wget https://scrutinizer-ci.com/ocular.phar
+          php ocular.phar code-coverage:upload --format=php-clover tests/clover.unit.xml
