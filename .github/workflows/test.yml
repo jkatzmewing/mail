@@ -25,7 +25,7 @@ jobs:
       uses: actions/checkout@master
       with:
         path: nextcloud/apps/mail
-    - name: Run tests
+    - name: Install dependencies
       working-directory: nextcloud/apps/mail
       run: composer install
     - name: Run tests
