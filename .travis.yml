@@ -67,6 +67,8 @@ cache:
 
 before_install:
   - php --info
+  - pecl install gd
+  - pecl install zip
 
   # Install Krankerl
   - wget https://github.com/ChristophWurst/krankerl/releases/download/v0.10.1/krankerl_0.10.1_amd64.deb
