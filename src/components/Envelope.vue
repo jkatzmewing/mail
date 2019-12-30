@@ -1,7 +1,7 @@
 <template>
 	<router-link
 		class="app-content-list-item"
-		:class="{unseen: data.flags.unseen, draft, selected: data.flags.selected}"
+		:class="{unseen: data.flags.unseen, draft, selected: selected}"
 		:to="link"
 		@click.native="onClick"
 	>
@@ -66,6 +66,10 @@ export default {
 			type: Object,
 			required: true,
 		},
+		selected: {
+			type: Boolean,
+			default: false,
+		}
 	},
 	computed: {
 		accountColor() {
@@ -146,11 +150,12 @@ export default {
 		onClick(e) {
 			// If shift or control key is pressed we must handle multiple selection
 			// rather than following the link
-			if (e.shiftKey || e.ctrlKey) {
-				if (e.ctrlKey) {
-					this.$store.dispatch('toggleEnvelopeSelected', this.data)
+			console.log(e)
+			if (e.shiftKey || e.ctrlKey || e.metaKey) {
+				if (e.ctrlKey || e.metaKey) {
+					this.$emit('select', this.data, false)
 				} else {
-					// TODO
+					this.$emit('select', this.data, true)
 				}
 				e.preventDefault()
 			}
