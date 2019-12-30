@@ -1,5 +1,13 @@
 <template>
 	<AppContentList :show-details="!show">
+		<div v-if="multipleSelection" class="multiselect-header">
+			<div><b>{{ selection.length + " messages selected" }}</b></div>
+			<Actions class="app-content-list-item-menu" menu-align="right">
+				<ActionButton icon="icon-mail">{{ t('mail', 'Mark read') }}</ActionButton>
+				<ActionButton icon="icon-mail">{{ t('mail', 'Mark unread') }}</ActionButton>
+                        	<ActionButton icon="icon-delete">{{ t('mail', 'Delete') }}</ActionButton>
+                	</Actions>
+		</div> 
 		<transition-group
 			v-infinite-scroll="loadMore"
 			v-scroll="onScroll"
@@ -27,6 +35,8 @@
 </template>
 
 <script>
+import Actions from '@nextcloud/vue/dist/Components/Actions'
+import ActionButton from '@nextcloud/vue/dist/Components/ActionButton'
 import AppContentList from '@nextcloud/vue/dist/Components/AppContentList'
 import infiniteScroll from 'vue-infinite-scroll'
 import vuescroll from 'vue-scroll'
@@ -41,6 +51,8 @@ Vue.use(vuescroll, {throttle: 600})
 export default {
 	name: 'EnvelopeList',
 	components: {
+		Actions,
+		ActionButton,
 		AppContentList,
 		Envelope,
 		EmptyFolder,
@@ -90,6 +102,10 @@ export default {
 		isSearch() {
 			return this.searchQuery !== undefined
 		},
+		multipleSelection() {
+			// returns true if multiple envelopes are selected
+			return this.selection.length > 0
+		},
 	},
 	methods: {
 		loadMore() {
@@ -129,13 +145,18 @@ export default {
 		onEnvelopeSelected(envelope, shiftKey) {
 			const idx = this.envelopes.indexOf(envelope)	
 
-			// If this is the first selected envelope, or the shift key is not pressed, simply add the envelope ID to the selection array
+			console.log(this.selection)
+			// If this is the first selected envelope, or the shift key is not pressed, simply add/remove the envelope ID to/from the selection array
 			if (!shiftKey || this.selection.length == 0) {
-				this.selection.push(idx)
+				if (!this.selection.includes(idx)) {
+					this.selection.push(idx)
+				} else {
+					this.selection.splice(this.selection.indexOf(idx), 1)
+				}
 				return
 			}
 
-			// Otherwise, add all envelopes between the last selected envelope and this one
+			// Otherwise, add (or remove) all envelopes between the last selected envelope and this one
 			const lastEnv = this.selection[this.selection.length - 1]
 			var start = lastEnv + 1
 			var last = idx
@@ -144,9 +165,12 @@ export default {
 				last = lastEnv - 1
 			}
 			for (var i = start; i <= last; i++) {
-				this.selection.push(i)
+				if (!this.selection.includes(i)) {
+					this.selection.push(i)
+				} else {
+					this.selection.splice(this.selection.indexOf(i), 1)
+				}
 			}
-
 			return
 		},
 		onEnvelopeDeleted(envelope) {
@@ -274,6 +298,14 @@ export default {
 </script>
 
 <style scoped>
+.multiselect-header {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	background: #0080ff;
+}
+
 #load-more-mail-messages {
 	margin: 10px auto;
 	padding: 10px;
