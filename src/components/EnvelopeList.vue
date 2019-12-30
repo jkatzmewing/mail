@@ -1,13 +1,15 @@
 <template>
 	<AppContentList :show-details="!show">
 		<div v-if="multipleSelection" class="multiselect-header">
-			<div><b>{{ selection.length + " messages selected" }}</b></div>
+			<div>
+				<b>{{ selection.length + ' messages selected' }}</b>
+			</div>
 			<Actions class="app-content-list-item-menu" menu-align="right">
 				<ActionButton icon="icon-mail">{{ t('mail', 'Mark read') }}</ActionButton>
 				<ActionButton icon="icon-mail">{{ t('mail', 'Mark unread') }}</ActionButton>
-                        	<ActionButton icon="icon-delete">{{ t('mail', 'Delete') }}</ActionButton>
-                	</Actions>
-		</div> 
+				<ActionButton icon="icon-delete">{{ t('mail', 'Delete') }}</ActionButton>
+			</Actions>
+		</div>
 		<transition-group
 			v-infinite-scroll="loadMore"
 			v-scroll="onScroll"
@@ -138,12 +140,12 @@ export default {
 		isEnvelopeSelected(idx) {
 			if (this.selection.length == 0) {
 				return false
-			} 
-			
+			}
+
 			return this.selection.includes(idx)
 		},
 		onEnvelopeSelected(envelope, shiftKey) {
-			const idx = this.envelopes.indexOf(envelope)	
+			const idx = this.envelopes.indexOf(envelope)
 
 			console.log(this.selection)
 			// If this is the first selected envelope, or the shift key is not pressed, simply add/remove the envelope ID to/from the selection array
