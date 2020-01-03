@@ -5,8 +5,8 @@
 				<b>{{ selection.length + ' messages selected' }}</b>
 			</div>
 			<Actions class="app-content-list-item-menu" menu-align="right">
-				<ActionButton icon="icon-mail">{{ t('mail', 'Mark read') }}</ActionButton>
-				<ActionButton icon="icon-mail">{{ t('mail', 'Mark unread') }}</ActionButton>
+				<ActionButton icon="icon-mail" @click.prevent="markSelectedSeenOrUnseen(false)">{{ t('mail', 'Mark read') }}</ActionButton>
+				<ActionButton icon="icon-mail" @click.prevent="markSelectedSeenOrUnseen(true)">{{ t('mail', 'Mark unread') }}</ActionButton>
 				<ActionButton icon="icon-delete">{{ t('mail', 'Delete') }}</ActionButton>
 			</Actions>
 		</div>
@@ -110,6 +110,15 @@ export default {
 		},
 	},
 	methods: {
+		markSelectedSeenOrUnseen(seenFlag) {
+			this.selection.forEach(envelopeUid => {
+				this.$store.dispatch('markEnvelopeSeenOrUnseen', {
+					envelope: this.envelopes[envelopeUid],
+					seenFlag: seenFlag,
+				})
+			})
+			this.selection = []
+		},
 		loadMore() {
 			this.loadingMore = true
 

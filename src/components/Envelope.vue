@@ -150,7 +150,6 @@ export default {
 		onClick(e) {
 			// If shift or control key is pressed we must handle multiple selection
 			// rather than following the link
-			console.log(e)
 			if (e.shiftKey || e.ctrlKey || e.metaKey) {
 				if (e.ctrlKey || e.metaKey) {
 					this.$emit('select', this.data, false)
