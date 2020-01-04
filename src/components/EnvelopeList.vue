@@ -5,9 +5,15 @@
 				<b>{{ selection.length + ' messages selected' }}</b>
 			</div>
 			<Actions class="app-content-list-item-menu" menu-align="right">
-				<ActionButton icon="icon-mail" @click.prevent="markSelectedSeenOrUnseen(false)">{{ t('mail', 'Mark read') }}</ActionButton>
-				<ActionButton icon="icon-mail" @click.prevent="markSelectedSeenOrUnseen(true)">{{ t('mail', 'Mark unread') }}</ActionButton>
-				<ActionButton icon="icon-delete">{{ t('mail', 'Delete') }}</ActionButton>
+				<ActionButton icon="icon-mail" @click.prevent="markSelectedSeenOrUnseen(false)">
+					{{ t('mail', 'Mark read') }}
+				</ActionButton>
+				<ActionButton icon="icon-mail" @click.prevent="markSelectedSeenOrUnseen(true)">
+					{{ t('mail', 'Mark unread') }}
+				</ActionButton>
+				<ActionButton icon="icon-delete" @click.prevent="deleteAllSelected">
+					{{ t('mail', 'Delete') }}
+				</ActionButton>
 			</Actions>
 		</div>
 		<transition-group
@@ -111,11 +117,37 @@ export default {
 	},
 	methods: {
 		markSelectedSeenOrUnseen(seenFlag) {
-			this.selection.forEach(envelopeUid => {
+			this.selection.forEach(envelopeId => {
 				this.$store.dispatch('markEnvelopeSeenOrUnseen', {
-					envelope: this.envelopes[envelopeUid],
+					envelope: this.envelopes[envelopeId],
 					seenFlag: seenFlag,
 				})
+			})
+			this.selection = []
+		},
+		deleteAllSelected() {
+			this.selection.forEach(envelopeId => {
+				// Navigate if the message beeing deleted is the one currently viewed
+				if (this.envelopes[envelopeId].uid == this.$route.params.messageUid) {
+					let next
+					if (envelopeId === 0) {
+						next = this.envelopes[envelopeId + 1]
+					} else {
+						next = this.envelopes[envelopeId - 1]
+					}
+
+					if (next) {
+						this.$router.push({
+							name: 'message',
+							params: {
+								accountId: this.$route.params.accountId,
+								folderId: this.$route.params.folderId,
+								messageUid: next.uid,
+							},
+						})
+					}
+				}
+				this.$store.dispatch('deleteMessage', this.envelopes[envelopeId])
 			})
 			this.selection = []
 		},
@@ -156,7 +188,6 @@ export default {
 		onEnvelopeSelected(envelope, shiftKey) {
 			const idx = this.envelopes.indexOf(envelope)
 
-			console.log(this.selection)
 			// If this is the first selected envelope, or the shift key is not pressed, simply add/remove the envelope ID to/from the selection array
 			if (!shiftKey || this.selection.length == 0) {
 				if (!this.selection.includes(idx)) {
